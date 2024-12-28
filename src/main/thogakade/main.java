@@ -6,6 +6,8 @@ package main.thogakade;
 
 import dbconnection.thogakade.DBConnection;
 import java.sql.*;
+import view.thogakade.AddcustomerForm;
+import view.thogakade.SearchCustomerForm;
 
 /**
  *
@@ -15,6 +17,8 @@ public class main {
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         Connection a1=DBConnection.getInstance().getConnection();
         System.out.println(a1);
+        new AddcustomerForm().setVisible(true);
+        new SearchCustomerForm().setVisible(true);
     }
          
     
