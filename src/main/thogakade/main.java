@@ -7,6 +7,7 @@ package main.thogakade;
 import dbconnection.thogakade.DBConnection;
 import java.sql.*;
 import view.thogakade.AddcustomerForm;
+import view.thogakade.DeleteCustomerForm;
 import view.thogakade.SearchCustomerForm;
 
 /**
@@ -19,6 +20,7 @@ public class main {
         System.out.println(a1);
         new AddcustomerForm().setVisible(true);
         new SearchCustomerForm().setVisible(true);
+        new DeleteCustomerForm().setVisible(true);
     }
          
     

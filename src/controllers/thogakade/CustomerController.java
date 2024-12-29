@@ -36,7 +36,15 @@ public class CustomerController {
             return customer;
    }
    return null;
-  }  
+  } 
+  
+  public static boolean deleteCustomer(String id) throws ClassNotFoundException, SQLException{
+      return DBConnection.getInstance().getConnection().createStatement().executeUpdate("Delete From Customer where id='" + id + "'") > 0;
+      
+  }
+  
+  
+  
 }
 
 
