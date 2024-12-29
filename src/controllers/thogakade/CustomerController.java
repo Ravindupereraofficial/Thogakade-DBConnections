@@ -7,6 +7,7 @@ package controllers.thogakade;
 import dbconnection.thogakade.DBConnection;
 
 import java.sql.*;
+import java.util.ArrayList;
 import models.thagakade.Customer;
 
 /**
@@ -43,6 +44,14 @@ public class CustomerController {
       
   }
   
+  public static ArrayList<String>getAllCustomerIds() throws ClassNotFoundException, SQLException{
+  ResultSet rst=DBConnection.getInstance().getConnection().createStatement().executeQuery("select id From Customer");
+  ArrayList<String> cusids=new ArrayList<>();
+  while(rst.next()){
+      cusids.add(rst.getString(1));
+  }
+  return cusids;
+  }
   
   
 }

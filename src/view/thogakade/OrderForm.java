@@ -5,21 +5,16 @@
  */
 package view.thogakade;
 
+import controllers.thogakade.CustomerController;
+import controllers.thogakade.ItemController;
+import controllers.thogakade.OrderController;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
-import lk.ijse.thogakade.controller.CustomerController;
-import lk.ijse.thogakade.controller.ItemController;
-import lk.ijse.thogakade.controller.OrderController;
-import lk.ijse.thogakade.model.Item;
-import lk.ijse.thogakade.model.Order;
-import lk.ijse.thogakade.model.OrderDetail;
+import models.thagakade.Item;
+
+
 
 /**
  *
@@ -30,7 +25,7 @@ public class OrderForm extends javax.swing.JFrame {
     /**
      * Creates new form OrderForm
      */
-    public OrderForm() {
+    public OrderForm() throws ClassNotFoundException, SQLException {
         initComponents();
         setLocationRelativeTo(null);
 
@@ -38,7 +33,7 @@ public class OrderForm extends javax.swing.JFrame {
         loadDate();
         //load all customer ids
         loadAllCustomerIds();
-        // load item codes
+        
         loadAllItemCodes();
         // load Order Id
         setOrderId();
@@ -49,65 +44,39 @@ public class OrderForm extends javax.swing.JFrame {
         txtOrderDate.setText(LocalDate.now().toString());
     }
 
-    private void loadAllCustomerIds() {
-        try {
-            for (String tempId : CustomerController.getAllCustomerIds()) {
-                cmbCustomerId.addItem(tempId);
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+    private void loadAllCustomerIds() throws ClassNotFoundException, SQLException {
+        for(String ids:CustomerController.getAllCustomerIds()){
+            cmbCustomerId.addItem(ids);
         }
+        
+        
     }
 
-    private void loadAllItemCodes() {
-        try {
-            for (String tempId : ItemController.loadAllItemCodes()) {
+    private void loadAllItemCodes() throws ClassNotFoundException, SQLException {
+        for (String tempId : ItemController.loadAllItemCodes()) {
                 cmbItemCode.addItem(tempId);
             }
 
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
     }
 
-    private void setOrderId() {
-        try {
-            String lastOrderId = OrderController.getLastOrderId();
-            if (lastOrderId != null) {
+    private void setOrderId() throws ClassNotFoundException, SQLException {
+        String lastOrderId=OrderController.getLastOrderId();
+        if (lastOrderId != null) {
                 String strLastDigits = lastOrderId.substring(1);
                 int lastDigits = Integer.parseInt(strLastDigits);
-                String lastId=String.format("D%03d",lastDigits+1);
+                String lastId=String.format("C%03d",lastDigits+1);
                 lblOrderId.setText(lastId);
             } else {
                 lblOrderId.setText("D001");
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+            }   
     }
 
     private int isAlreadyExists(String code) {
-        DefaultTableModel dtm = (DefaultTableModel) tblItemDetails.getModel();
-        for (int i = 0; i < tblItemDetails.getRowCount(); i++) {
-            String tempCode = (String) dtm.getValueAt(i, 0);
-            if (tempCode.equals(code)) {
-                return i;
-            }
-        }
-        return -1;
+    return 1;    
     }
 
     private void calculateTotal() {
-        DefaultTableModel dtm = (DefaultTableModel) tblItemDetails.getModel();
-
-        double total = 0;
-
-        for (int i = 0; i < dtm.getRowCount(); i++) {
-            total += (double) dtm.getValueAt(i, 4);
-
-        }
-        lblTotal.setText(String.valueOf(total));
+        
     }
 
     /**
@@ -149,6 +118,7 @@ public class OrderForm extends javax.swing.JFrame {
         btnPlaceOrder = new javax.swing.JButton();
         addNewCustomerButton = new javax.swing.JButton();
         btnCommit = new javax.swing.JButton();
+        refreshbtn = new javax.swing.JButton();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -328,6 +298,13 @@ public class OrderForm extends javax.swing.JFrame {
             }
         });
 
+        refreshbtn.setText("Refresh");
+        refreshbtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                refreshbtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -341,10 +318,6 @@ public class OrderForm extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel1)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane2)
@@ -370,14 +343,7 @@ public class OrderForm extends javax.swing.JFrame {
                                             .addComponent(txtOrderDate)
                                             .addComponent(lblCustomerName, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)))
                                     .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                                    .addComponent(jLabel9)
-                                                    .addComponent(cmbCustomerId, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(addNewCustomerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addComponent(lblDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 274, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(lblDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 274, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -394,8 +360,20 @@ public class OrderForm extends javax.swing.JFrame {
                                             .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
                                             .addGroup(layout.createSequentialGroup()
                                                 .addGap(35, 35, 35)
-                                                .addComponent(jLabel15)))))))
-                        .addContainerGap())))
+                                                .addComponent(jLabel15))))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(jLabel9)
+                                            .addComponent(cmbCustomerId, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(0, 0, Short.MAX_VALUE)))))
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(addNewCustomerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1)
+                            .addComponent(refreshbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel16)
@@ -416,19 +394,25 @@ public class OrderForm extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblOrderId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel4)
-                                .addComponent(txtOrderDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblOrderId, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel4)
+                                        .addComponent(txtOrderDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblCustomerName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel5)
+                                        .addComponent(cmbCustomerId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel6))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(16, 16, 16)
+                                .addComponent(addNewCustomerButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(refreshbtn)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblCustomerName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel5)
-                                .addComponent(cmbCustomerId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel6)
-                                .addComponent(addNewCustomerButton)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
                             .addComponent(jLabel9)
@@ -470,59 +454,35 @@ public class OrderForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmbCustomerIdItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbCustomerIdItemStateChanged
+        
         try {
-            String customerId = cmbCustomerId.getSelectedItem().toString();
-            lblCustomerName.setText(CustomerController.searchCustomer(customerId).getName());
-        } catch (SQLException | ClassNotFoundException e) {
-
+            String customerId=cmbCustomerId.getSelectedItem().toString();
+            lblCustomerName.setText( CustomerController.searchCustomer(customerId).getName());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
         }
+       
     }//GEN-LAST:event_cmbCustomerIdItemStateChanged
 
     private void cmbItemCodeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbItemCodeItemStateChanged
         try {
-            Item item = ItemController.searchItem(cmbItemCode.getSelectedItem().toString());
+            Item item=ItemController.searchItem(cmbItemCode.getSelectedItem().toString());
             lblDescription.setText(item.getDescription());
             lblUnitPrice.setText(String.valueOf(item.getUnitPrice()));
             lblQtyOnHand.setText(String.valueOf(item.getQtyOnHand()));
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
     }//GEN-LAST:event_cmbItemCodeItemStateChanged
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
 
-        DefaultTableModel dtm = (DefaultTableModel) tblItemDetails.getModel();
-
-        int qty = Integer.parseInt(txtQty.getText());
-        double unitPrice = Double.parseDouble(lblUnitPrice.getText());
-        double total = unitPrice * qty;
-
-        int row = isAlreadyExists(cmbItemCode.getSelectedItem().toString());
-
-        if (row == -1) {
-            Object[] rowData = {
-                cmbItemCode.getSelectedItem().toString(),
-                lblDescription.getText(),
-                qty,
-                unitPrice,
-                total
-            };
-
-            dtm.addRow(rowData);
-
-        } else {
-            qty += (int) dtm.getValueAt(row, 2);
-            total += qty * unitPrice;
-
-            tblItemDetails.setValueAt(qty, row, 2);
-            tblItemDetails.setValueAt(total, row, 4);
-        }
-
-        txtQty.setText("");
-
-        calculateTotal();
-        cmbItemCode.requestFocus();
-
+       
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void tblItemDetailsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblItemDetailsMouseClicked
@@ -531,14 +491,7 @@ public class OrderForm extends javax.swing.JFrame {
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
 
-        int selectedRow = tblItemDetails.getSelectedRow();
-        if (selectedRow == -1) {
-            return;
-        }
-
-        DefaultTableModel dtm = (DefaultTableModel) tblItemDetails.getModel();
-        dtm.removeRow(selectedRow);
-        calculateTotal();
+     
     }//GEN-LAST:event_btnRemoveActionPerformed
 
     private void txtQtyKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtQtyKeyPressed
@@ -546,32 +499,7 @@ public class OrderForm extends javax.swing.JFrame {
     }//GEN-LAST:event_txtQtyKeyPressed
 
     private void btnPlaceOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaceOrderActionPerformed
-        String orderId=lblOrderId.getText();
-        String orderData=txtOrderDate.getText();
-        String customerId=cmbCustomerId.getSelectedItem().toString();
-        ArrayList <OrderDetail>orderDetailList=new ArrayList<>();
-        DefaultTableModel dtm=(DefaultTableModel) tblItemDetails.getModel();
-        for (int i = 0; i < dtm.getRowCount(); i++) {
-            String itemCode=(String) dtm.getValueAt(i, 0);
-            int orderQty=(int) dtm.getValueAt(i, 2);
-            double unitPrice=(double) dtm.getValueAt(i, 3);
-            OrderDetail orderDetail=new OrderDetail(orderId, itemCode, orderQty, unitPrice);
-            orderDetailList.add(orderDetail);
-        }
-        Order order=new Order(orderId, orderData, customerId, orderDetailList);
-        try {
-            boolean isAdded = OrderController.placeOrder(order); //addNewOrder
-            if(isAdded){
-                JOptionPane.showMessageDialog(this, "Added Success");
-                setOrderId();
-            }else{
-                JOptionPane.showMessageDialog(this, "Added Fail");
-            }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
     }//GEN-LAST:event_btnPlaceOrderActionPerformed
 
     private void addNewCustomerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewCustomerButtonActionPerformed
@@ -590,55 +518,22 @@ public class OrderForm extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnCommitActionPerformed
 
+    private void refreshbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshbtnActionPerformed
+        try {
+            loadAllCustomerIds();
+            // TODO add your handling code here:
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_refreshbtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(OrderForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(OrderForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(OrderForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(OrderForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new OrderForm().setVisible(true);
-            }
-        });
-    }
+    
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addNewCustomerButton;
@@ -668,6 +563,7 @@ public class OrderForm extends javax.swing.JFrame {
     private javax.swing.JLabel lblQtyOnHand;
     private javax.swing.JLabel lblTotal;
     private javax.swing.JLabel lblUnitPrice;
+    private javax.swing.JButton refreshbtn;
     private javax.swing.JTable tblItemDetails;
     private javax.swing.JTextField txtOrderDate;
     private javax.swing.JTextField txtQty;
