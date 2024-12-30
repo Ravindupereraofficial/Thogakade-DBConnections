@@ -10,9 +10,14 @@ import controllers.thogakade.ItemController;
 import controllers.thogakade.OrderController;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 import models.thagakade.Item;
+import models.thagakade.Order;
+import models.thagakade.OrderDetail;
 
 
 
@@ -64,7 +69,7 @@ public class OrderForm extends javax.swing.JFrame {
         if (lastOrderId != null) {
                 String strLastDigits = lastOrderId.substring(1);
                 int lastDigits = Integer.parseInt(strLastDigits);
-                String lastId=String.format("C%03d",lastDigits+1);
+                String lastId=String.format("D%03d",lastDigits+1);
                 lblOrderId.setText(lastId);
             } else {
                 lblOrderId.setText("D001");
@@ -72,10 +77,26 @@ public class OrderForm extends javax.swing.JFrame {
     }
 
     private int isAlreadyExists(String code) {
-    return 1;    
+   DefaultTableModel dtm = (DefaultTableModel) tblItemDetails.getModel();
+        for (int i = 0; i < tblItemDetails.getRowCount(); i++) {
+            String tempCode = (String) dtm.getValueAt(i, 0);
+            if (tempCode.equals(code)) {
+                return i;
+            }
+        }
+        return -1; 
     }
 
     private void calculateTotal() {
+        DefaultTableModel dtm = (DefaultTableModel) tblItemDetails.getModel();
+
+        double total = 0;
+
+        for (int i = 0; i < dtm.getRowCount(); i++) {
+            total += (double) dtm.getValueAt(i, 4);
+
+        }
+        lblTotal.setText(String.valueOf(total));
         
     }
 
@@ -481,6 +502,37 @@ public class OrderForm extends javax.swing.JFrame {
     }//GEN-LAST:event_cmbItemCodeItemStateChanged
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        DefaultTableModel dtm = (DefaultTableModel) tblItemDetails.getModel();
+
+        int qty = Integer.parseInt(txtQty.getText());
+        double unitPrice = Double.parseDouble(lblUnitPrice.getText());
+        double total = unitPrice * qty;
+
+        int row = isAlreadyExists(cmbItemCode.getSelectedItem().toString());
+
+        if (row == -1) {
+            Object[] rowData = {
+                cmbItemCode.getSelectedItem().toString(),
+                lblDescription.getText(),
+                qty,
+                unitPrice,
+                total
+            };
+
+            dtm.addRow(rowData);
+
+        } else {
+            qty += (int) dtm.getValueAt(row, 2);
+            total += qty * unitPrice;
+
+            tblItemDetails.setValueAt(qty, row, 2);
+            tblItemDetails.setValueAt(total, row, 4);
+        }
+
+        txtQty.setText("");
+
+        calculateTotal();
+        cmbItemCode.requestFocus();
 
        
     }//GEN-LAST:event_btnAddActionPerformed
@@ -490,7 +542,14 @@ public class OrderForm extends javax.swing.JFrame {
     }//GEN-LAST:event_tblItemDetailsMouseClicked
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
+  int selectedRow = tblItemDetails.getSelectedRow();
+        if (selectedRow == -1) {
+            return;
+        }
 
+        DefaultTableModel dtm = (DefaultTableModel) tblItemDetails.getModel();
+        dtm.removeRow(selectedRow);
+        calculateTotal();
      
     }//GEN-LAST:event_btnRemoveActionPerformed
 
@@ -499,7 +558,32 @@ public class OrderForm extends javax.swing.JFrame {
     }//GEN-LAST:event_txtQtyKeyPressed
 
     private void btnPlaceOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaceOrderActionPerformed
-        
+     String orderId=lblOrderId.getText();
+        String orderData=txtOrderDate.getText();
+        String customerId=cmbCustomerId.getSelectedItem().toString();
+        ArrayList <OrderDetail>orderDetailList=new ArrayList<>();
+        DefaultTableModel dtm=(DefaultTableModel) tblItemDetails.getModel();
+        for (int i = 0; i < dtm.getRowCount(); i++) {
+            String itemCode=(String) dtm.getValueAt(i, 0);
+            int orderQty=(int) dtm.getValueAt(i, 2);
+            double unitPrice=(double) dtm.getValueAt(i, 3);
+            OrderDetail orderDetail=new OrderDetail(orderId, itemCode, orderQty, unitPrice);
+            orderDetailList.add(orderDetail);
+        }
+        Order order=new Order(orderId, orderData, customerId, orderDetailList);
+        try {
+            boolean isAdded = OrderController.placeOrder(order); //addNewOrder
+            if(isAdded){
+                JOptionPane.showMessageDialog(this, "Added Success");
+                setOrderId();
+            }else{
+                JOptionPane.showMessageDialog(this, "Added Fail");
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(OrderForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_btnPlaceOrderActionPerformed
 
     private void addNewCustomerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewCustomerButtonActionPerformed

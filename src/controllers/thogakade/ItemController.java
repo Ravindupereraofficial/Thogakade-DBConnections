@@ -11,6 +11,7 @@ import com.sun.jdi.connect.spi.Connection;
 import dbconnection.thogakade.DBConnection;
 import java.util.ArrayList;
 import models.thagakade.Item;
+import models.thagakade.OrderDetail;
 
 
 
@@ -51,4 +52,20 @@ public static Item searchItem(String itemCode) throws ClassNotFoundException, SQ
         }
 
 }
+
+public static boolean updateStock(ArrayList <OrderDetail>orderDetails) throws ClassNotFoundException, SQLException{
+        for (OrderDetail orderDetail : orderDetails) {
+            boolean updateStock = updateStock(orderDetail);
+            if(!updateStock){
+                return false;
+            }
+        }
+        return !orderDetails.isEmpty(); //Not empty
+    }
+    public static boolean updateStock(OrderDetail orderDetail) throws ClassNotFoundException, SQLException{
+        PreparedStatement stm = DBConnection.getInstance().getConnection().prepareStatement("Update Item set qtyOnHand=qtyOnHand-? where code=?");
+        stm.setObject(1, orderDetail.getQty());
+        stm.setObject(2, orderDetail.getItemCode());
+        return stm.executeUpdate()>0;
+    }
 }
